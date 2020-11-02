@@ -49,7 +49,7 @@ function renderhome($mysqli)
     <div class="Left"><?php
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"View today's list\"/>
   <input name=\"action\" type=\"hidden\" id=\"i\" value=\"allchores\"/></form>";
-  $statement = $mysqli->prepare("select realname,id from users");
+  $statement = $mysqli->prepare("select realname,id from users where type != 1");
   $statement->execute();
   $statement->store_result();
   $statement->bind_result($name, $id);
@@ -167,7 +167,9 @@ function renderallchores($mysqli)
 {
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
   $statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, case when 
-  (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" else \"incompletebutton\" end
+  (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 
+  then \"completebutton\" else \"incompletebutton\" end, 
+  (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity
   from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) order by a.id");
   
   #$statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) order by a.id");
@@ -175,20 +177,23 @@ function renderallchores($mysqli)
   if ($statement->execute())
   {
     $statement->store_result();
-    $statement->bind_result($name, $userid, $chore, $description, $assignment, $buttonstyle);
+    $statement->bind_result($name, $userid, $chore, $description, $assignment, $buttonstyle, $quantity);
     if ($statement->num_rows > 0)
     {
       echo "<p>Here are all the chores for today</p>";
       while ($statement->fetch())
       {
+        $chorecount = "";
+        if ( $quantity > 1 ) {          
+          $chorecount = "x ".$quantity;
+        }
         echo "<form method =\"POST\" id=\"namebutton\" action=\"./\">
               <label for=\"chore\">" . $name . "</label></br>
-              <input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . "\"/>
+              <input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " " . $chorecount . "\"/>
               <input name=\"action\" type=\"hidden\" id=\"i\" value=\"choredetail\"/>
               <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
               <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $userid . "\"/>
               </form><p>";
-
       }
     }
     else
@@ -302,7 +307,7 @@ function renderauth($mysqli)
         <td onclick="addCode('#');">#</td>
     </tr>
 </table>
-<input type="text" name="code" value="" maxlength="4" class="display" readonly="readonly" /><br>
+<input type="password" name="code" value="" maxlength="4" class="display" readonly="readonly" /><br>
 <?php
     $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user, c.max from chores c join assignments a on a.chore_id = c.id join users u on a.assigned_user = u.id where a.assigned_user = ? and a.id = ?");
     $statement->bind_param('ii', $_REQUEST['userid'], $_REQUEST['assignment']);
@@ -337,7 +342,7 @@ function renderauth($mysqli)
 	    }	
       }
     }
-    $statement = $mysqli->prepare("select u.realname, u.id from  users u where u.id != ?");
+    $statement = $mysqli->prepare("select u.realname, u.id from  users u where u.id != ? and u.type < 3");
     $statement->bind_param('i', $_REQUEST['userid']);
     if ($statement->execute())
     {
