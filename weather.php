@@ -33,4 +33,16 @@
             <div>Humidity: <?php echo $data->main->humidity; ?> %</div>
             <div>Feel Like: <?php echo $data->main->feels_like; ?>°F</div>
             <div>Wind: <?php echo $data->wind->speed; ?> km/h</div>
+            <div>
+           <?php
+            $url = "https://bitpay.com/api/rates";
+            $json = json_decode(file_get_contents($url));
+            $dollar = $btc = 0;
+            foreach($json as $obj){
+              if ($obj->code == "USD") {
+              echo 'Bitcoin: $'. $obj->rate .'<br>';
+              }
+            }
+          ?>
+           </div>
         </div>

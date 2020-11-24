@@ -131,7 +131,7 @@ function renderuser($mysqli)
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
   $statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id, case when 
   (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" else \"incompletebutton\" end
-  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) and a.assigned_user = ?");
+  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and a.assigned_user = ?");
   #$statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) and a.assigned_user = ?");
   $statement->bind_param('i', $_REQUEST['userid']);
   if ($statement->execute())
@@ -166,12 +166,17 @@ function renderuser($mysqli)
 function renderallchores($mysqli)
 {
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
-  $statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, case when 
-  (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 
-  then \"completebutton\" else \"incompletebutton\" end, 
-  (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity
-  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) order by a.id");
-  
+  #$statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, case when 
+  #(select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 
+  #then \"completebutton\" else \"incompletebutton\" end, 
+  #(select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity
+  #from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) order by a.id");
+  $statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, 
+  case when (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0    
+  then 'completebutton' else 'incompletebutton'
+  end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity 
+  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id 
+  where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) order by a.id");
   #$statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) order by a.id");
   #$statement->bind_param('i', $_REQUEST['userid']);
   if ($statement->execute())
