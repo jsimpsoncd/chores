@@ -4,7 +4,6 @@
     <title>Chores UI parents page</title>
   </head>
   <body>
-	  
 <?php
 include_once ("./config.php");
 $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
