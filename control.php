@@ -13,31 +13,15 @@ if ($mysqli->connect_errno)
   echo "Failed to connect to MySQL: " . $mysqli->connect_error;
   exit();
 }
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == "chorelist")
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == "manageusers")
 {
   renderuser($mysqli);
 }
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == "bonus")
-{
-  renderbonus($mysqli);
-}
-elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "allchores")
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "managechores")
 {
   renderallchores($mysqli);
 }
-elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "choredetail")
-{
-  renderchore($mysqli);
-}
-elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "authenticate")
-{
-  renderauth($mysqli);
-}
-elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "choreapprove")
-{
-  renderauth($mysqli);
-}
-if (!isset($_REQUEST['action']))
+elseif (!isset($_REQUEST['action']))
 {
   renderhome($mysqli);
 }
@@ -165,10 +149,6 @@ function renderuser($mysqli)
   {
     echo ('Error executing MySQL query: ' . $statement->error);
   }
-echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Bonus!\"/>
-<input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
-<input name=\"action\" type=\"hidden\" id=\"i\" value=\"bonus\"/>
-</form>";
 }
 
 function renderallchores($mysqli)
@@ -298,7 +278,28 @@ function renderauth($mysqli)
 <?php echo "<input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
             <input name=\"approver\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['approver'] . "\"/>
             <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['assignment'] . "\"/>" ?>
-<?php keypad();?>
+<table id="keypad" cellpadding="5" cellspacing="3">
+  <tr>
+      <td onclick="addCode('1');">1</td>
+        <td onclick="addCode('2');">2</td>
+        <td onclick="addCode('3');">3</td>
+    </tr>
+    <tr>
+      <td onclick="addCode('4');">4</td>
+        <td onclick="addCode('5');">5</td>
+        <td onclick="addCode('6');">6</td>
+    </tr>
+    <tr>
+      <td onclick="addCode('7');">7</td>
+        <td onclick="addCode('8');">8</td>
+        <td onclick="addCode('9');">9</td>
+    </tr>
+    <tr>
+      <td onclick="addCode('*');">*</td>
+        <td onclick="addCode('0');">0</td>
+        <td onclick="addCode('#');">#</td>
+    </tr>
+</table>
 <input type="password" name="code" value="" maxlength="4" class="display" readonly="readonly" /><br>
 <?php
     $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user, c.max from chores c join assignments a on a.chore_id = c.id join users u on a.assigned_user = u.id where a.assigned_user = ? and a.id = ?");
@@ -379,126 +380,6 @@ function renderauth($mysqli)
 <?php
   }
 }
-function renderbonus($mysqli)
-{
-  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return to chore list\"/>
-        <input name=\"action\" type=\"hidden\" id=\"i\" value=\"chorelist\"/>
-        <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
-        </form><p>\n";
-  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form><p>\n\n";
-  if (isset($_REQUEST['code']))
-  {
-    $statement = $mysqli->prepare("select u.realname, u.id, u.pin from users u where u.id = ?");
-    $statement->bind_param('i', $_REQUEST['approver']);
-    if ($statement->execute())
-    {
-      $statement->store_result();
-      $statement->bind_result($approvername, $approver, $code);
-      if ($statement->num_rows > 0)
-      {
-        $statement->fetch();
-        if ($code == $_REQUEST['code'])
-        {
-          echo "Bonus approved by " . $approvername . "<br>";              
-          $payrate = ".50";
-          $pay = $_REQUEST['count'] * $payrate;
-          echo "Pay of  $" . $pay . " for ".$_REQUEST['count']." at ".$payrate."<br>";
-          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) values (CURDATE(), NOW(), ?, ?, ?, ?)");
-          $statement->bind_param('iidi', $_REQUEST['assignment'], $_REQUEST['userid'], $payrate, $_REQUEST['count']);
-          $statement->execute();
-          $statement->store_result();
-          echo $statement->num_rows;
-        }
-      }
-    }
-  }
-  else
-  {
-?>
-<form id="keyform" action="./" method="POST" action="./">
-<input name="action" type="hidden" id="i" value="bonus"/>
-<?php echo "<input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
-            <input name=\"approver\" type=\"hidden\" id=\"i\" value=\"1\"/>            
-            <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"0\"/>" ?>
-<label for="code">Enter Parents Pin</label>
-<?php keypad();?>
-<input type="password" name="code" value="" maxlength="4" class="display" readonly="readonly" /><br>
-<?php
-
-?>
-            <label for="count">Choose quantity (each is worth 50 cents):</label>
-            <select name="count" id="count" class="select-css">
-            <?php
-          for ($cnt = 1;$cnt <= 20;$cnt++)
-          {
-            
-            if ($cnt == $_REQUEST['count'])
-            {
-              echo "<option value =\"" . $cnt . "\" selected>" . $cnt . "</option>\n";
-            }
-            else
-            {
-              echo "<option value =\"" . $cnt . "\">" . $cnt . "</option>\n";
-            }
-          }
-?></select><br>
-            <?php
-    
-  
-?>
-<p id="message">VERIFYING...</p>
-</form>
-    <script type="text/javascript">
-    function addCode(key){
-      var code = document.getElementById("keyform").code;
-      if(code.value.length < 4){
-        code.value = code.value + key;
-      }
-      if(code.value.length == 4){
-        document.getElementById("message").style.display = "block";
-        setTimeout(submitForm,1000);  
-      }
-    }
-
-    function submitForm(){
-      document.getElementById("keyform").submit();
-    }
-
-    function emptyCode(){
-      document.getElementById("keyform").code.value = "";
-    }
-    </script>
-
-<?php
-  }
-}
-function keypad()
-{
-  ?>
-  <table id="keypad" cellpadding="5" cellspacing="3">
-  <tr>
-      <td onclick="addCode('1');">1</td>
-        <td onclick="addCode('2');">2</td>
-        <td onclick="addCode('3');">3</td>
-    </tr>
-    <tr>
-      <td onclick="addCode('4');">4</td>
-        <td onclick="addCode('5');">5</td>
-        <td onclick="addCode('6');">6</td>
-    </tr>
-    <tr>
-      <td onclick="addCode('7');">7</td>
-        <td onclick="addCode('8');">8</td>
-        <td onclick="addCode('9');">9</td>
-    </tr>
-    <tr>
-      <td onclick="addCode('*');">*</td>
-        <td onclick="addCode('0');">0</td>
-        <td onclick="addCode('#');">#</td>
-    </tr>
-  </table>
-  <?php
-}
 function welcome()
 {
 
@@ -521,5 +402,9 @@ function welcome()
 
   }
 
+}
+function renderapprove($mysqli)
+{
+  echo "Hi";
 }
 ?>

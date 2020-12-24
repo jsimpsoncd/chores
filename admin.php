@@ -15,7 +15,7 @@ if ($mysqli->connect_errno)
 }
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"View today's list\"/>
   <input name=\"action\" type=\"hidden\" id=\"i\" value=\"allchores\"/></form>";
-  $statement = $mysqli->prepare("select date, u.realname, sum(act.payrate * act.quantity) as pay, sum(quantity) from activity act join users u on u.id = act.user_id where (date = curdate() -1 or date = curdate() -2 or date = curdate() -3) group by u.realname, date order by date;");
+  $statement = $mysqli->prepare("select date, u.realname, sum(act.payrate * act.quantity) as pay, sum(quantity) from activity act join users u on u.id = act.user_id where (date(date) = curdate() -1 or date = curdate() -2 or date = curdate() -3 or date = curdate() -4) group by u.realname, date order by date;");
   $statement->execute();
   $statement->store_result();
   $statement->bind_result($date, $name, $pay, $count);
