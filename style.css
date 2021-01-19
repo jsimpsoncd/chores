@@ -1,3 +1,7 @@
+body {
+  background-color: black;
+  color: green;
+}
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -48,37 +52,39 @@ p {
   font-family: Arial, Geneva, Helvetica, sans-serif;
   color: green;
 }
+
 .namebutton {
   background-color: #1766E7; /* Blue */
   border: none;
   color: white;
-  padding: 12px 32px;
+  padding: 10px 30px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
+  display: inline-grid;
+  font-size: 15px;
   width: 200px
 }
+
 .completebutton {
   background-color: #4CAF50; /* Green */
   border: none;
   color: white;
-  padding: 12px 32px;
+  padding: 10px 30px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
+  display: inline-grid;
+  font-size: 15px;
   width: 200px
 }
 .incompletebutton {
   background-color: #FF6347 ; /* Red */
   border: none;
   color: white;
-  padding: 12px 32px;
+  padding: 10px 30px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
+  display: inline-grid;
+  font-size: 15px;
   width: 200px
 }
 #keypad {margin:10px; margin-top:20px;}
