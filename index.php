@@ -37,6 +37,10 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "choreapprove")
 {
   renderauth($mysqli);
 }
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "wiki")
+{
+  renderwiki($mysqli);
+}
 if (!isset($_REQUEST['action']))
 {
   renderhome($mysqli);
@@ -67,6 +71,8 @@ function renderhome($mysqli)
               </form><p>\n";
     }
   }
+ echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"View the Wiki\"/>
+  <input name=\"action\" type=\"hidden\" id=\"i\" value=\"wiki\"/></form>";
 ?></div><div class="Right">
     <div class="report-container" id="weather-report">
     </div>
@@ -98,7 +104,10 @@ function getHTTPObject() {
   }
   return xmlhttp;
 };
- 
+function renderwiki() {
+echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
+<iframe src="http://griffin/mediawiki" width="100%" height="100%"></iframe>
+};
 function fetchData() {
   http = getHTTPObject();
   http.open('get', "./weather.php?xhttp=true", true);
