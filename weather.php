@@ -45,7 +45,4 @@
             }
           ?>
            </div>
-        </div>
-        <div>
-          <iframe src="http://free.timeanddate.com/countdown/i7n3z5zo/n263/cf12/cm0/cu4/ct0/cs0/ca0/cr0/ss0/cac0f0/cpcf00/pct/tcfff/fs100/szw320/szh135/tatTime%20left%20to%20Event%20in/tac0f0/tptTime%20since%20Event%20started%20in/tpcf00/mac0f0/mpcf00/iso2021-01-20T11:30:00" allowTransparency="true" frameborder="0" width="181" height="69"></iframe>
-        </div>
+</div>
