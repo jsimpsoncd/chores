@@ -22,14 +22,12 @@ if ($mysqli->connect_errno)
       $statement->bind_param('i', $aid);
       $statement->execute();
     }
-    #$statement = $mysqli->prepare("update"); 
   }
-  print_r($_REQUEST); 
   echo "<br>";
-  $statement = $mysqli->prepare("select date(date), u.realname, act.payrate * act.quantity as pay, act.id from activity act join users u on u.id = act.user_id where date >= DATE_SUB(CURDATE(),INTERVAL 10 day) and date != curdate() and paid != 1 order by u.realname,  date;");
+  $statement = $mysqli->prepare("select date(date), u.realname, act.payrate * act.quantity as pay, act.id, ch.name from activity act join users u on u.id = act.user_id join assignments asg on act.assignment_id = asg.id join chores ch on asg.chore_id = ch.id where date >= DATE_SUB(CURDATE(),INTERVAL 10 day) and date != curdate() and paid != 1 order by u.realname,  date;");
   $statement->execute();
   $statement->store_result();
-  $statement->bind_result($date, $name, $pay, $id);
+  $statement->bind_result($date, $name, $pay, $id, $cname);
   $maxid = 0;
   if ($statement->num_rows > 0)
   {
@@ -39,8 +37,9 @@ if ($mysqli->connect_errno)
       $rows[$id]['name'] = $name;
       $rows[$id]['pay'] = $pay;
       $rows[$id]['id'] = $id;
+      $rows[$id]['name'] = $cname;
       $pays[$name] = $pays[$name] + $pay;
-      echo $rows[$id]['name']." earned ". $pay ."<br>\n";
+      echo $name." earned ". $pay ." on ".$date." for ".$cname."<br>\n";
     }
   }
   //Print the payout list
